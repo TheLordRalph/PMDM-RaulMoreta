@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ConfigurationChanges</string>
+    <string name="write_smz">Write something</string>
+</resources>
