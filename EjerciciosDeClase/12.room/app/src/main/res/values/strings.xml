@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">room</string>
+    <string name="add">add</string>
+    <string name="edit_student">edit student</string>
+    <string name="delete_student">delete student</string>
+    <string name="name">Name</string>
+    <string name="first_surname">First Surname</string>
+    <string name="second_surname">Second Surname</string>
+    <string name="save">Save</string>
+</resources>
