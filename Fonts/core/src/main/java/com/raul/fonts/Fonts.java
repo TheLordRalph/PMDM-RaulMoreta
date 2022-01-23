@@ -34,9 +34,9 @@ public class Fonts extends ApplicationAdapter {
 		//longGlyphLayout = new GlyphLayout(font, "programacion multimedia y dispositvos moviles", font.getColor(), Gdx.graphics.getWidth()/4, Aling.topLeft());
 
 		topLeftGlyphLayout = new GlyphLayout(font, "programacion multimedia", font.getColor(), Gdx.graphics.getWidth()/2, Align.topLeft, true);
-		topRightGlyphLayout = new GlyphLayout(font, "programacion multimedia", font.getColor(), Gdx.graphics.getWidth()/2, Align.topLeft, true);
-		downLeftGlyphLayout = new GlyphLayout(font, "programacion multimedia", font.getColor(), Gdx.graphics.getWidth()/2, Align.topLeft, true);
-		downRightGlyphLayout = new GlyphLayout(font, "programacion multimedia", font.getColor(), Gdx.graphics.getWidth()/2, Align.topLeft, true);
+		topRightGlyphLayout = new GlyphLayout(font, "programacion multimedia", font.getColor(), Gdx.graphics.getWidth()/2, Align.topRight, true);
+		downLeftGlyphLayout = new GlyphLayout(font, "programacion multimedia", font.getColor(), Gdx.graphics.getWidth()/2, Align.bottomLeft, true);
+		downRightGlyphLayout = new GlyphLayout(font, "programacion multimedia", font.getColor(), Gdx.graphics.getWidth()/2, Align.bottomRight, true);
 
 	}
 
@@ -46,9 +46,9 @@ public class Fonts extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
 		font.draw(batch, topLeftGlyphLayout, 0, Gdx.graphics.getHeight());
-		font.draw(batch, topRightGlyphLayout, 1, 1);
-		font.draw(batch, downLeftGlyphLayout, 5, 5);
-		font.draw(batch, downRightGlyphLayout, 8, 8);
+		font.draw(batch, topRightGlyphLayout, Gdx.graphics.getWidth() - topRightGlyphLayout.width,  Gdx.graphics.getHeight());
+		font.draw(batch, downLeftGlyphLayout, 0, downLeftGlyphLayout.height + 0);
+		font.draw(batch, downRightGlyphLayout, Gdx.graphics.getWidth() - downRightGlyphLayout.width,  downRightGlyphLayout.height + 0);
 		batch.end();
 	}
 
