@@ -26,6 +26,7 @@ public class SpeciesAdapter extends RecyclerView.Adapter<SpeciesViewHolder> {
         _onSpeciesClickListener = onSpeciesClickListener;
     }
 
+
     @NonNull
     @Override
     public SpeciesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
