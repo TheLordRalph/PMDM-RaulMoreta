@@ -70,8 +70,8 @@ public class Thrustcopter extends ApplicationAdapter {
 	}
 
 	private void updateScene() {
-		terrainOffest -= 200 * Gdx.graphics.getDeltaTime();
-		if (terrainOffest <= -belowTextureRegion.getRegionWidth()) {
+		terrainOffest += 200 * Gdx.graphics.getDeltaTime();
+		if (terrainOffest >= belowTextureRegion.getRegionWidth()) {
 			terrainOffest = 0f;
 		}
 
@@ -88,10 +88,10 @@ public class Thrustcopter extends ApplicationAdapter {
 
 
 		batch.draw(belowTextureRegion, terrainOffest, 0);
-		batch.draw(belowTextureRegion, terrainOffest + belowTextureRegion.getRegionWidth(), 0);
+		batch.draw(belowTextureRegion, terrainOffest - belowTextureRegion.getRegionWidth(), 0);
 
 		batch.draw(aboveTextureRegion, terrainOffest, HEIGHT-aboveTextureRegion.getRegionHeight());
-		batch.draw(aboveTextureRegion, terrainOffest + aboveTextureRegion.getRegionWidth(), HEIGHT-aboveTextureRegion.getRegionHeight());
+		batch.draw(aboveTextureRegion, terrainOffest - aboveTextureRegion.getRegionWidth(), HEIGHT-aboveTextureRegion.getRegionHeight());
 
 		batch.draw(planeAnimation.getKeyFrame(planeAnimTime), 1, backGround.getHeight() / 2);
 		batch.end();
