@@ -13,6 +13,7 @@ public class EndScreen extends ScreenAdapter {
     HelloWorldGame game;
 
     GlyphLayout tiempo;
+    GlyphLayout puntos;
     GlyphLayout reinicio;
 
     public EndScreen(HelloWorldGame game) {
@@ -23,6 +24,7 @@ public class EndScreen extends ScreenAdapter {
     public void show() {
 
         tiempo = new GlyphLayout(game.fontIntro1, String.format("Tiempo transcurrido:  %s", game.fileTime.readString()), game.fontIntro1.getColor(), game.WIDTH/2, Align.center, true);
+        puntos = new GlyphLayout(game.fontIntro1, String.format("Puntos Conseguidos:  %s", game.filePuntos.readString()), game.fontIntro1.getColor(), game.WIDTH/2, Align.center, true);
         reinicio = new GlyphLayout(game.fontIntro1, "Pulsa Enter para reiniciar.", game.fontIntro1.getColor(), game.WIDTH/2, Align.center, true);
 
         Gdx.input.setInputProcessor(new InputAdapter() {
@@ -45,6 +47,7 @@ public class EndScreen extends ScreenAdapter {
         game.batch.begin();
 
         game.fontIntro1.draw(game.batch, tiempo, game.WIDTH/4,  game.HEIGHT/2+tiempo.height/2);
+        game.fontIntro1.draw(game.batch, puntos, game.WIDTH/4,  game.HEIGHT/2-puntos.height);
         game.fontIntro1.draw(game.batch, reinicio, game.WIDTH/4,  reinicio.height);
 
         game.batch.end();

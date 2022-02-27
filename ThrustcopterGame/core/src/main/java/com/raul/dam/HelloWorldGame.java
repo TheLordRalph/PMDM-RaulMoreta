@@ -15,9 +15,9 @@ public class HelloWorldGame extends Game {
     protected static final float TERREIN_SPEED_PPS = 200f;
     protected static final float BACKGROUND_SPEED_PPS = 20f;
     protected static final float PLANE_TAP_VELOCITY = 300f;
-    protected static final int PILLAR_DISTANCE_RANGE = WIDTH/2;
-    protected static final int MIN_PILLAR_DISTANCE = WIDTH/2;
-    protected static final float NEW_PILLAR_POSITION_THRESHOLD = WIDTH/2f;
+    protected static final int TURBOLASER_DISTANCE_RANGE = WIDTH/2;
+    protected static final int MIN_TURBOLASER_DISTANCE = WIDTH/2;
+    protected static final float NEW_TURBOLASER_POSITION_THRESHOLD = WIDTH/2f;
 
     SpriteBatch batch;
     public BitmapFont fontGame;

@@ -31,9 +31,9 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
     // Sprites
     TextureAtlas textureAtlas;
 
-    // Pillars Terrain
-    private Array<Vector2> pillars = new Array<>();
-    public Vector2 lastPillarPosition;
+    // Turbolaser Terrain
+    private Array<Trubolaser> turbolasers = new Array<>();
+    public Vector2 lastTurbolaserPosition;
 
     private float terrainOffest = 0f;
     private float backgroundOffest = 0f;
@@ -46,8 +46,8 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
     private TextureRegion belowTextureRegion;
     private TextureRegion aboveTextureRegion;
 
-    private TextureRegion pillarUp;
-    private TextureRegion pillarDown;
+    private TextureRegion turbolaserUp;
+    private TextureRegion turbolaserDown;
 
     private TextureRegion cazaTie;
 
@@ -68,7 +68,7 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
 
     // HitBox
     private final Rectangle planeBoundingBox = new Rectangle();
-    private final Rectangle pillarBoundingBox = new Rectangle();
+    private final Rectangle turbolaserBoundingBox = new Rectangle();
     private final Rectangle puntosBoundingBox = new Rectangle();
     private final Rectangle cazaTieBoundingBox = new Rectangle();
 
@@ -102,9 +102,9 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         aboveTextureRegion = new TextureRegion(belowTextureRegion);
         aboveTextureRegion.flip(true, true);
 
-        pillarUp = textureAtlas.findRegion("turbolaser");
-        pillarDown = new TextureRegion(pillarUp);
-        pillarDown.flip(true, true);
+        turbolaserUp = textureAtlas.findRegion("turbolaser");
+        turbolaserDown = new TextureRegion(turbolaserUp);
+        turbolaserDown.flip(true, true);
 
         cazaTie = textureAtlas.findRegion("cazaTie");
 
@@ -129,7 +129,7 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         game.musicGame.setLooping(true);
 
         addCazaTie();
-        addPillar();
+        addTurbolaser();
     }
 
     @Override
@@ -175,25 +175,27 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
             gameOver();
         }
 
-        for (Vector2 pillar : pillars) {
-            pillar.x -= game.TERREIN_SPEED_PPS * Gdx.graphics.getDeltaTime();
-            if (pillar.y ==1){
-                pillarBoundingBox.set(pillar.x + 10, 0, pillarUp.getRegionWidth() - 20, pillarUp.getRegionHeight() - 10);
+        for (Trubolaser trubolaser : turbolasers) {
+            trubolaser.getPosition().x -= game.TERREIN_SPEED_PPS * Gdx.graphics.getDeltaTime();
+            if (trubolaser.getPosition().y ==1){
+                turbolaserBoundingBox.set(trubolaser.getPosition().x + 10, 0, turbolaserUp.getRegionWidth() - 20, turbolaserUp.getRegionHeight() - 10);
             } else {
-                pillarBoundingBox.set(pillar.x + 10,game.HEIGHT - pillarDown.getRegionHeight() + 10, pillarUp.getRegionWidth() - 20, pillarUp.getRegionHeight());
+                turbolaserBoundingBox.set(trubolaser.getPosition().x + 10,game.HEIGHT - turbolaserDown.getRegionHeight() + 10, turbolaserUp.getRegionWidth() - 20, turbolaserUp.getRegionHeight());
             }
 
-            puntosBoundingBox.set(pillar.x + pillarUp.getRegionWidth(), 0, 0, game.HEIGHT);
+            puntosBoundingBox.set(trubolaser.getPosition().x + turbolaserUp.getRegionWidth(), 0, 0, game.HEIGHT);
 
 
-            if (planeBoundingBox.overlaps(pillarBoundingBox)) {
+            if (planeBoundingBox.overlaps(turbolaserBoundingBox)) {
                 gameOver();
-            } else if (planeBoundingBox.overlaps(puntosBoundingBox)) {
+            } else if (planeBoundingBox.overlaps(puntosBoundingBox) && !trubolaser.isSuperado()) {
                 puntos++;
+                game.filePuntos.writeString(String.format("%d", puntos), false);
+                trubolaser.setSuperado(true);
             }
 
-            if (pillar.x<0-pillarUp.getRegionWidth()) {
-                pillars.removeValue(pillar, false);
+            if (trubolaser.getPosition().x<0- turbolaserUp.getRegionWidth()) {
+                turbolasers.removeValue(trubolaser, false);
             }
         }
 
@@ -205,8 +207,8 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         }
 
         if (MathUtils.randomBoolean()) {
-            if (lastPillarPosition.x < game.NEW_PILLAR_POSITION_THRESHOLD) {
-                    addPillar();
+            if (lastTurbolaserPosition.x < game.NEW_TURBOLASER_POSITION_THRESHOLD) {
+                    addTurbolaser();
                 }
             } else {
             if (lastCazaTie.x < 0) {
@@ -236,21 +238,15 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         game.batch.draw(aboveTextureRegion, terrainOffest + aboveTextureRegion.getRegionWidth(), game.HEIGHT - game.HEIGHT/5);
 
 
-        for (Vector2 pillar : pillars) {
-            if (pillar.y == 1) {
-                game.batch.draw(pillarUp,pillar.x,0);
+        for (Trubolaser trubolaser : turbolasers) {
+            if (trubolaser.getPosition().y == 1) {
+                game.batch.draw(turbolaserUp,trubolaser.getPosition().x,0);
             } else {
-                game.batch.draw(pillarDown,pillar.x,game.HEIGHT-pillarDown.getRegionHeight());
+                game.batch.draw(turbolaserDown,trubolaser.getPosition().x,game.HEIGHT- turbolaserDown.getRegionHeight());
             }
         }
 
         game.batch.draw(cazaTie, lastCazaTie.x, lastCazaTie.y);
-
-        /*game.batch.draw(escudo, posicionEscudo.x, posicionEscudo.y);
-
-        if (escudoActivado) {
-            game.batch.draw(escudo1, planePosition.x-planeTexture1.getRegionWidth()/5, planePosition.y-planeTexture1.getRegionHeight()/5);
-        }*/
 
         // FONTS
         // time
@@ -291,21 +287,21 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
     }
 
 
-    private void addPillar() {
+    private void addTurbolaser() {
 
         Vector2 tmPosition = new Vector2();
-        if (pillars.size == 0) {
-            tmPosition.x = (game.MIN_PILLAR_DISTANCE + (float) (game.PILLAR_DISTANCE_RANGE * Math.random()));
+        if (turbolasers.size == 0) {
+            tmPosition.x = (game.MIN_TURBOLASER_DISTANCE + (float) (game.TURBOLASER_DISTANCE_RANGE * Math.random()));
         } else {
-            tmPosition.x = lastPillarPosition.x + game.MIN_PILLAR_DISTANCE + (float) (game.PILLAR_DISTANCE_RANGE * Math.random());
+            tmPosition.x = lastTurbolaserPosition.x + game.MIN_TURBOLASER_DISTANCE + (float) (game.TURBOLASER_DISTANCE_RANGE * Math.random());
         }
         if (MathUtils.randomBoolean()) {
             tmPosition.y = 1;
         } else {
             tmPosition.y = -1;
         }
-        lastPillarPosition = tmPosition;
-        pillars.add(tmPosition);
+        lastTurbolaserPosition = tmPosition;
+        turbolasers.add(new Trubolaser(tmPosition));
     }
 
     private void addCazaTie() {
