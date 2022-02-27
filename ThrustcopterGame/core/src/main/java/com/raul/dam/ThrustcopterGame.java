@@ -123,6 +123,7 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         planeVelocity = new Vector2();
         Gdx.input.setInputProcessor(this);
 
+        // Music
         game.muerte = Gdx.audio.newMusic(Gdx.files.internal("sound/muerte.mp3"));
         game.musicGame = Gdx.audio.newMusic(Gdx.files.internal("sound/MusicGame.mp3"));
         game.musicGame.play();

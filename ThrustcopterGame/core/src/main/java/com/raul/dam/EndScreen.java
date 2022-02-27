@@ -7,6 +7,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 
 public class EndScreen extends ScreenAdapter {
 
@@ -46,8 +47,8 @@ public class EndScreen extends ScreenAdapter {
 
         game.batch.begin();
 
-        game.fontIntro1.draw(game.batch, tiempo, game.WIDTH/4,  game.HEIGHT/2+tiempo.height/2);
-        game.fontIntro1.draw(game.batch, puntos, game.WIDTH/4,  game.HEIGHT/2-puntos.height);
+        game.fontIntro1.draw(game.batch, tiempo, game.WIDTH/4,  game.HEIGHT-tiempo.height*2);
+        game.fontIntro1.draw(game.batch, puntos, game.WIDTH/4,  game.HEIGHT-puntos.height*4);
         game.fontIntro1.draw(game.batch, reinicio, game.WIDTH/4,  reinicio.height);
 
         game.batch.end();
