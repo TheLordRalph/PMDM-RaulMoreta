@@ -1,14 +1,19 @@
-package com.raul.fonts;
+package com.raul.dam;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.utils.Align;
 
 public class EndScreen extends ScreenAdapter {
 
     HelloWorldGame game;
+
+    GlyphLayout tiempo;
+    GlyphLayout reinicio;
 
     public EndScreen(HelloWorldGame game) {
         this.game = game;
@@ -16,15 +21,18 @@ public class EndScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+
+        tiempo = new GlyphLayout(game.fontIntro1, String.format("Tiempo transcurrido:  %s", game.fileTime.readString()), game.fontIntro1.getColor(), game.WIDTH/2, Align.center, true);
+        reinicio = new GlyphLayout(game.fontIntro1, "Pulsa Enter para reiniciar.", game.fontIntro1.getColor(), game.WIDTH/2, Align.center, true);
+
         Gdx.input.setInputProcessor(new InputAdapter() {
 
             @Override
             public boolean keyDown(int keyCode) {
-
                 if (keyCode == Input.Keys.ENTER) {
-                    game.setScreen(new TitleScreen(game));
+                    game.muerte.stop();
+                    game.setScreen(new CinematicScreen(game));
                 }
-
                 return true;
             }
         });
@@ -32,10 +40,13 @@ public class EndScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         game.batch.begin();
+
+        game.fontIntro1.draw(game.batch, tiempo, game.WIDTH/4,  game.HEIGHT/2+tiempo.height/2);
+        game.fontIntro1.draw(game.batch, reinicio, game.WIDTH/4,  reinicio.height);
+
         game.batch.end();
 
     }

@@ -1,49 +1,28 @@
-package com.raul.fonts;
+package com.raul.dam;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-
-import java.text.DecimalFormat;
-
-import sun.font.CreatedFontTracker;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
     HelloWorldGame game;
 
-    // Statics Finals
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 480;
-    public static final float TERREIN_SPEED_PPS = 200f;
-    public static final float BACKGROUND_SPEED_PPS = 20f;
-    public static final float PLANE_TAP_VELOCITY = 300f;
-    private static final int PILLAR_DISTANCE_RANGE = WIDTH/2;
-    private static final int MIN_PILLAR_DISTANCE = WIDTH/2;
-    private static final float NEW_PILLAR_POSITION_THRESHOLD = WIDTH/2f;
 
+    private float start;
+    private static final int TIEMPO_START = 3;
 
     // Camara
     private OrthographicCamera camera;
@@ -59,6 +38,9 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
     private float terrainOffest = 0f;
     private float backgroundOffest = 0f;
 
+    // CazaTie
+    private Vector2 lastCazaTie;
+
     // TextureRegion
     private TextureRegion backgroundTextureRegion;
     private TextureRegion belowTextureRegion;
@@ -66,6 +48,8 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
 
     private TextureRegion pillarUp;
     private TextureRegion pillarDown;
+
+    private TextureRegion cazaTie;
 
     private TextureRegion planeTexture1;
     private TextureRegion planeTexture2;
@@ -85,9 +69,8 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
     // HitBox
     private final Rectangle planeBoundingBox = new Rectangle();
     private final Rectangle pillarBoundingBox = new Rectangle();
-
-    // Sonido y musica
-    //Sound creashSound;
+    private final Rectangle puntosBoundingBox = new Rectangle();
+    private final Rectangle cazaTieBoundingBox = new Rectangle();
 
     // Text
     GlyphLayout time;
@@ -98,6 +81,8 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
     private int second = 0;
     private int minute = 0;
 
+    private int puntos = 0;
+
     public ThrustcopterGame(HelloWorldGame game) {
         this.game = game;
     }
@@ -106,11 +91,11 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
     public void show() {
         // Camara
         camera = new OrthographicCamera();
-        camera.position.set(WIDTH/2, HEIGHT/2, 0);
-        fitViewport = new FitViewport(WIDTH, HEIGHT, camera);
+        camera.position.set(game.WIDTH/2, game.HEIGHT/2, 0);
+        fitViewport = new FitViewport(game.WIDTH, game.HEIGHT, camera);
 
         // TextureRegion
-        textureAtlas = new TextureAtlas(Gdx.files.internal("pack.atlas"));
+        textureAtlas = new TextureAtlas(Gdx.files.internal("assetsSW.atlas"));
         backgroundTextureRegion = textureAtlas.findRegion("backgrounds");
 
         belowTextureRegion = textureAtlas.findRegion("terrain1");
@@ -121,6 +106,8 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         pillarDown = new TextureRegion(pillarUp);
         pillarDown.flip(true, true);
 
+        cazaTie = textureAtlas.findRegion("cazaTie");
+
         planeTexture1 = textureAtlas.findRegion("XWing1");
         planeTexture2 = textureAtlas.findRegion("XWing2");
         planeTexture3 = textureAtlas.findRegion("XWing3");
@@ -130,20 +117,18 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         planeAnimation.setPlayMode(Animation.PlayMode.LOOP);
 
         // PlanePosition
-        defaultPlanePosition = new Vector2(planeTexture1.getRegionWidth() / 2, HEIGHT / 2 - planeTexture1.getRegionHeight() / 2);
+        defaultPlanePosition = new Vector2(planeTexture1.getRegionWidth() / 2, game.HEIGHT / 2 - planeTexture1.getRegionHeight() / 2);
         planePosition = new Vector2(defaultPlanePosition);
         gravity = new Vector2(0, -10f);
         planeVelocity = new Vector2();
         Gdx.input.setInputProcessor(this);
 
-        // Sonido Musica
-        //creashSound = Gdx.audio.newSound(Gdx.files.internal("crash.ogg"));
+        game.muerte = Gdx.audio.newMusic(Gdx.files.internal("sound/muerte.mp3"));
+        game.musicGame = Gdx.audio.newMusic(Gdx.files.internal("sound/MusicGame.mp3"));
+        game.musicGame.play();
+        game.musicGame.setLooping(true);
 
-        // Text
-        time = new GlyphLayout(game.font, String.format("%02d : %02d", minute, second), game.font.getColor(), Gdx.graphics.getWidth()/2, Align.topRight, true);
-        points = new GlyphLayout(game.font, String.format("Puntos: 0"), game.font.getColor(), Gdx.graphics.getWidth()/2, Align.topRight, true);
-
-
+        addCazaTie();
         addPillar();
     }
 
@@ -154,27 +139,26 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
 
     @Override
     public void render(float delta) {
-        timeSeconds += Gdx.graphics.getRawDeltaTime();
-        if(timeSeconds > period){
-            second += timeSeconds;
-            if (second >= 60) {
-                second = 0;
-                minute++;
+            timeSeconds += Gdx.graphics.getDeltaTime();
+            if (timeSeconds > period) {
+                second += timeSeconds;
+                game.fileTime.writeString(String.format("%02d : %02d", minute, second), false);
+                if (second >= 60) {
+                    second = 0;
+                    minute++;
+                }
+                timeSeconds -= period;
             }
-            timeSeconds-=period;
-            handleEvent();
-        }
-
-        updateScene();
-        drawScene();
+            updateScene();
+            drawScene();
     }
 
     private void updateScene() {
-        terrainOffest -= TERREIN_SPEED_PPS * Gdx.graphics.getDeltaTime();
+        terrainOffest -= game.TERREIN_SPEED_PPS * Gdx.graphics.getDeltaTime();
         if (terrainOffest <= -belowTextureRegion.getRegionWidth()) {
             terrainOffest = 0f;
         }
-        backgroundOffest -= BACKGROUND_SPEED_PPS * Gdx.graphics.getDeltaTime();
+        backgroundOffest -= game.BACKGROUND_SPEED_PPS * Gdx.graphics.getDeltaTime();
         if (backgroundOffest <= -backgroundTextureRegion.getRegionWidth()) {
             backgroundOffest = 0f;
         }
@@ -187,21 +171,25 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         planeBoundingBox.set(planePosition.x + planeTexture1.getRegionWidth()/4, planePosition.y + planeTexture1.getRegionHeight()/4, planeTexture1.getRegionWidth()-planeTexture1.getRegionWidth()/2, planeTexture1.getRegionHeight()-planeTexture1.getRegionHeight()/2);
         
         // COMPROBACION MUERTE POR SUELO O TECHO
-        if (planePosition.y > HEIGHT-HEIGHT/3 || planePosition.y < HEIGHT/7) {
-            game.setScreen(new EndScreen(game));
+        if (planePosition.y > game.HEIGHT-game.HEIGHT/3 || planePosition.y < game.HEIGHT/7) {
+            gameOver();
         }
 
         for (Vector2 pillar : pillars) {
-            pillar.x -= TERREIN_SPEED_PPS * Gdx.graphics.getDeltaTime();
+            pillar.x -= game.TERREIN_SPEED_PPS * Gdx.graphics.getDeltaTime();
             if (pillar.y ==1){
-                pillarBoundingBox.set(pillar.x + 30, 0, pillarUp.getRegionWidth() - 60, pillarUp.getRegionHeight() - 20);
+                pillarBoundingBox.set(pillar.x + 10, 0, pillarUp.getRegionWidth() - 20, pillarUp.getRegionHeight() - 10);
             } else {
-                pillarBoundingBox.set(pillar.x + 30, pillar.y, pillarDown.getRegionWidth() - 60, pillarDown.getRegionHeight());
+                pillarBoundingBox.set(pillar.x + 10,game.HEIGHT - pillarDown.getRegionHeight() + 10, pillarUp.getRegionWidth() - 20, pillarUp.getRegionHeight());
             }
 
+            puntosBoundingBox.set(pillar.x + pillarUp.getRegionWidth(), 0, 0, game.HEIGHT);
+
+
             if (planeBoundingBox.overlaps(pillarBoundingBox)) {
-                System.out.println("muerto");
-                game.setScreen(new EndScreen(game));
+                gameOver();
+            } else if (planeBoundingBox.overlaps(puntosBoundingBox)) {
+                puntos++;
             }
 
             if (pillar.x<0-pillarUp.getRegionWidth()) {
@@ -209,13 +197,27 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
             }
         }
 
-        if (lastPillarPosition.x < NEW_PILLAR_POSITION_THRESHOLD) {
-            addPillar();
+        lastCazaTie.x -= 4;
+        cazaTieBoundingBox.set(lastCazaTie.x+cazaTie.getRegionWidth()/4, lastCazaTie.y+cazaTie.getRegionHeight()/4, cazaTie.getRegionWidth()-cazaTie.getRegionWidth()/2, cazaTie.getRegionHeight()-cazaTie.getRegionHeight()/2);
+
+        if (planeBoundingBox.overlaps(cazaTieBoundingBox)) {
+            gameOver();
         }
 
-        if (planePosition.y <= 0) {
-            planePosition.y = 0;
+        if (MathUtils.randomBoolean()) {
+            if (lastPillarPosition.x < game.NEW_PILLAR_POSITION_THRESHOLD) {
+                    addPillar();
+                }
+            } else {
+            if (lastCazaTie.x < 0) {
+                addCazaTie();
+            }
         }
+
+
+        // Text
+        time = new GlyphLayout(game.fontGame, String.format("%02d : %02d", minute, second), game.fontGame.getColor(), Gdx.graphics.getWidth()/2, Align.center, true);
+        points = new GlyphLayout(game.fontGame, String.format("Puntos: %d", puntos), game.fontGame.getColor(), Gdx.graphics.getWidth()/2, Align.center, true);
     }
 
     private void drawScene() {
@@ -227,29 +229,58 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         game.batch.draw(backgroundTextureRegion, backgroundOffest, 0);
         game.batch.draw(backgroundTextureRegion, backgroundOffest + backgroundTextureRegion.getRegionWidth(), 0);
 
-        game.batch.draw(belowTextureRegion, terrainOffest, 0 - HEIGHT/3);
-        game.batch.draw(belowTextureRegion, terrainOffest + belowTextureRegion.getRegionWidth(), 0 - HEIGHT/3);
+        game.batch.draw(belowTextureRegion, terrainOffest, 0 - game.HEIGHT/3);
+        game.batch.draw(belowTextureRegion, terrainOffest + belowTextureRegion.getRegionWidth(), 0 - game.HEIGHT/3);
 
-        game.batch.draw(aboveTextureRegion, terrainOffest, HEIGHT - HEIGHT/5);
-        game.batch.draw(aboveTextureRegion, terrainOffest + aboveTextureRegion.getRegionWidth(), HEIGHT - HEIGHT/5);
+        game.batch.draw(aboveTextureRegion, terrainOffest, game.HEIGHT - game.HEIGHT/5);
+        game.batch.draw(aboveTextureRegion, terrainOffest + aboveTextureRegion.getRegionWidth(), game.HEIGHT - game.HEIGHT/5);
 
 
         for (Vector2 pillar : pillars) {
             if (pillar.y == 1) {
                 game.batch.draw(pillarUp,pillar.x,0);
             } else {
-                game.batch.draw(pillarDown,pillar.x,HEIGHT-pillarDown.getRegionHeight());
+                game.batch.draw(pillarDown,pillar.x,game.HEIGHT-pillarDown.getRegionHeight());
             }
         }
 
+        game.batch.draw(cazaTie, lastCazaTie.x, lastCazaTie.y);
 
-        game.batch.draw(planeAnimation.getKeyFrame(planeAnimTime), planePosition.x, planePosition.y);
+        /*game.batch.draw(escudo, posicionEscudo.x, posicionEscudo.y);
+
+        if (escudoActivado) {
+            game.batch.draw(escudo1, planePosition.x-planeTexture1.getRegionWidth()/5, planePosition.y-planeTexture1.getRegionHeight()/5);
+        }*/
 
         // FONTS
         // time
-        game.font.draw(game.batch, time, WIDTH/2,  HEIGHT);
+        game.fontGame.draw(game.batch, time, game.WIDTH/2-game.WIDTH/2+time.width,  game.HEIGHT);
         // points
-        game.font.draw(game.batch, points, WIDTH/2,  HEIGHT-20);
+        game.fontGame.draw(game.batch, points, game.WIDTH/2,  game.HEIGHT);
+
+
+        // Animacion
+
+        TextureRegion keyFrame = planeAnimation.getKeyFrame(planeAnimTime);
+        int rotation = 270;
+        if (planeVelocity.y > 30) {
+            rotation = 280;
+            game.batch.draw(keyFrame, planePosition.x, planePosition.y,
+                    keyFrame.getRegionWidth() / 2.0f,
+                    keyFrame.getRegionHeight() / 2.0f, keyFrame.getRegionWidth(),
+                    keyFrame.getRegionHeight(), 1f, 1f, rotation, false);
+        } else if (planeVelocity.y < -30) {
+            rotation = 260;
+            game.batch.draw(keyFrame, planePosition.x, planePosition.y,
+                    keyFrame.getRegionWidth() / 2.0f,
+                    keyFrame.getRegionHeight() / 2.0f, keyFrame.getRegionWidth(),
+                    keyFrame.getRegionHeight(), 1f, 1f, rotation, false);
+        } else {
+            game.batch.draw(keyFrame, planePosition.x, planePosition.y,
+                    keyFrame.getRegionWidth() / 2.0f,
+                    keyFrame.getRegionHeight() / 2.0f, keyFrame.getRegionWidth(),
+                    keyFrame.getRegionHeight(), 1f, 1f, rotation, false);
+        }
 
         game.batch.end();
     }
@@ -264,9 +295,9 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
 
         Vector2 tmPosition = new Vector2();
         if (pillars.size == 0) {
-            tmPosition.x = (MIN_PILLAR_DISTANCE + (float) (PILLAR_DISTANCE_RANGE * Math.random()));
+            tmPosition.x = (game.MIN_PILLAR_DISTANCE + (float) (game.PILLAR_DISTANCE_RANGE * Math.random()));
         } else {
-            tmPosition.x = lastPillarPosition.x + MIN_PILLAR_DISTANCE + (float) (PILLAR_DISTANCE_RANGE * Math.random());
+            tmPosition.x = lastPillarPosition.x + game.MIN_PILLAR_DISTANCE + (float) (game.PILLAR_DISTANCE_RANGE * Math.random());
         }
         if (MathUtils.randomBoolean()) {
             tmPosition.y = 1;
@@ -277,11 +308,22 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
         pillars.add(tmPosition);
     }
 
+    private void addCazaTie() {
 
-    public void handleEvent() {
+        Vector2 tmPosition = new Vector2();
 
+        tmPosition.x = game.WIDTH;
+        tmPosition.y = game.HEIGHT/2 - cazaTie.getRegionHeight()/2;
+
+        lastCazaTie = tmPosition;
     }
 
+
+    private void gameOver() {
+        game.musicGame.stop();
+        game.muerte.play();
+        game.setScreen(new EndScreen(game));
+    }
 
     // InputProcessor
 
@@ -302,7 +344,7 @@ public class ThrustcopterGame extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int i, int i1, int i2, int i3) {
-        planeVelocity.add(new Vector2(0, PLANE_TAP_VELOCITY));
+        planeVelocity.add(new Vector2(0, game.PLANE_TAP_VELOCITY));
         planeVelocity.add(new Vector2(0, 0));
         return true;
     }

@@ -1,4 +1,4 @@
-pack.png
+assetsSW.png
 size: 808, 974
 format: RGBA8888
 filter: Linear,Linear
@@ -10,6 +10,13 @@ backgrounds
   orig: 800, 480
   offset: 0, 0
   index: -1
+cazaTie
+  rotate: false
+  xy: 0, 0
+  size: 100, 94
+  orig: 100, 94
+  offset: 0, 0
+  index: -1
 terrain1
   rotate: false
   xy: 0, 716
@@ -19,28 +26,28 @@ terrain1
   index: -1
 turbolaser
   rotate: false
-  xy: 369, 0
+  xy: 469, 0
   size: 128, 236
   orig: 128, 236
   offset: 0, 0
   index: -1
 XWing1
   rotate: false
-  xy: 0, 0
+  xy: 100, 0
   size: 121, 103
   orig: 121, 103
   offset: 0, 0
   index: 1
 XWing2
   rotate: false
-  xy: 121, 0
+  xy: 221, 0
   size: 123, 103
   orig: 123, 103
   offset: 0, 0
   index: 2
 XWing3
   rotate: false
-  xy: 244, 0
+  xy: 344, 0
   size: 125, 103
   orig: 125, 103
   offset: 0, 0

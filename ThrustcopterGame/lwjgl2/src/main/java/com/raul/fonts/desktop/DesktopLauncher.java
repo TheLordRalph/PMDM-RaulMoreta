@@ -3,8 +3,7 @@ package com.raul.fonts.desktop;
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.raul.fonts.HelloWorldGame;
-import com.raul.fonts.ThrustcopterGame;
+import com.raul.dam.HelloWorldGame;
 
 /** Launches the desktop (LWJGL) application. */
 public class DesktopLauncher {

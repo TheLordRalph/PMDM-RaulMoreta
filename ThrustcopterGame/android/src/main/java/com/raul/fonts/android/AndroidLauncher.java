@@ -4,8 +4,7 @@ import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import com.raul.fonts.HelloWorldGame;
-import com.raul.fonts.ThrustcopterGame;
+import com.raul.dam.HelloWorldGame;
 
 /** Launches the Android application. */
 public class AndroidLauncher extends AndroidApplication {
